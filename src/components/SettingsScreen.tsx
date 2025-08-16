@@ -183,7 +183,7 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
           <Button variant="outline" className="w-full justify-start h-auto p-4">
             <div className="text-left">
               <h4 className="font-medium">Help & Support</h4>
-              <p className="text-sm text-muted-foreground">Get help with using LughaSmart</p>
+              <p className="text-sm text-muted-foreground">Get help with using Lugha Learner</p>
             </div>
           </Button>
         </CardContent>

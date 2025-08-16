@@ -36,12 +36,12 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
           <div className="flex justify-center mb-4">
             <img 
               src={mascotImage} 
-              alt="LughaSmart Mascot" 
+              alt="Lugha Learner Mascot" 
               className="w-20 h-20"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-sunset bg-clip-text text-transparent">
-            Welcome to LughaSmart
+            Welcome to Lugha Learner
           </CardTitle>
           <CardDescription className="text-base">
             Join thousands learning African languages!

@@ -53,12 +53,12 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
           <div className="flex justify-center mb-4">
             <img 
               src={mascotImage} 
-              alt="LughaSmart Mascot" 
+              alt="Lugha Learner Mascot" 
               className="w-24 h-24 animate-bounce"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-sunset bg-clip-text text-transparent">
-            Karibu LughaSmart! 🎉
+            Karibu Lugha Learner! 🎉
           </CardTitle>
           <CardDescription className="text-base">
             Let's start your African language journey together!

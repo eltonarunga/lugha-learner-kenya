@@ -28,7 +28,7 @@ const Index = () => {
     setUserData({ ...data, isGuest: userData?.isGuest || false });
     setCurrentScreen("dashboard");
     toast({
-      title: "Welcome to LughaSmart! 🎉",
+      title: "Welcome to Lugha Learner! 🎉",
       description: `Ready to start learning ${data.language}?`,
     });
   };

@@ -15,6 +15,9 @@ interface Question {
   explanation: string;
 }
 
+// Note: When using real database questions, correct answers are not exposed
+// to prevent cheating. The backend validates answers securely.
+
 interface LessonScreenProps {
   language: string;
   onComplete: (xp: number) => void;

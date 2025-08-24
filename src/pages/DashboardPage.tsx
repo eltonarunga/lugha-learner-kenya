@@ -3,16 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Flame, Star, Play, Target, Calendar } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-interface DashboardScreenProps {
-  userName: string;
-  language: string;
-  onStartLesson: () => void;
-  onViewProgress: () => void;
-  onViewLeaderboard: () => void;
-}
+const DashboardPage = () => {
+  const { userData } = useUser();
+  const navigate = useNavigate();
 
-export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgress, onViewLeaderboard }: DashboardScreenProps) => {
   // Mock data - would come from backend in real app
   const userStats = {
     xp: 1250,
@@ -24,9 +22,9 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
     todayProgress: 30
   };
 
-  const languageLabels = {
+  const languageLabels: { [key: string]: string } = {
     swahili: "Kiswahili",
-    kikuyu: "Gĩkũyũ", 
+    kikuyu: "Gĩkũyũ",
     luo: "Dholuo"
   };
 
@@ -43,15 +41,23 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
     { id: 3, title: "Quick Learner", icon: "⚡", unlocked: false }
   ];
 
+  if (!userData) {
+    return <Navigate to="/auth" />;
+  }
+
+  const onStartLesson = () => navigate("/lesson");
+  const onViewProgress = () => navigate("/progress");
+  const onViewLeaderboard = () => navigate("/leaderboard");
+
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold">
-          Jambo, {userName}! 👋
+          Jambo, {userData.name}! 👋
         </h1>
         <p className="text-muted-foreground">
-          Ready to continue your {languageLabels[language as keyof typeof languageLabels]} journey?
+          Ready to continue your {languageLabels[userData.language]} journey?
         </p>
       </div>
 
@@ -118,11 +124,11 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
         </CardHeader>
         <CardContent className="space-y-3">
           {todayLessons.map((lesson) => (
-            <div 
+            <div
               key={lesson.id}
               className={`flex items-center justify-between p-3 rounded-lg border transition-smooth ${
-                lesson.completed 
-                  ? "bg-success/10 border-success/20" 
+                lesson.completed
+                  ? "bg-success/10 border-success/20"
                   : "bg-muted/50 border-border hover:bg-muted/80"
               }`}
             >
@@ -138,9 +144,9 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
                 </div>
               </div>
               {!lesson.completed && (
-                <Button 
+                <Button
                   onClick={onStartLesson}
-                  variant="lesson" 
+                  variant="lesson"
                   size="sm"
                   className="flex items-center gap-1"
                 >
@@ -161,11 +167,11 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
         <CardContent>
           <div className="flex space-x-4">
             {achievements.map((achievement) => (
-              <div 
+              <div
                 key={achievement.id}
                 className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-smooth ${
-                  achievement.unlocked 
-                    ? "bg-gradient-success text-success-foreground shadow-celebration" 
+                  achievement.unlocked
+                    ? "bg-gradient-success text-success-foreground shadow-celebration"
                     : "bg-muted/50 opacity-50"
                 }`}
               >
@@ -179,16 +185,16 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3 pb-6">
-        <Button 
+        <Button
           onClick={onViewProgress}
           variant="outline"
           className="h-12"
         >
           View Progress
         </Button>
-        <Button 
+        <Button
           onClick={onViewLeaderboard}
-          variant="outline" 
+          variant="outline"
           className="h-12"
         >
           Leaderboard
@@ -197,3 +203,5 @@ export const DashboardScreen = ({ userName, language, onStartLesson, onViewProgr
     </div>
   );
 };
+
+export default DashboardPage;

@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Trophy, Star, Target, Calendar, BookOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { Navigate } from "react-router-dom";
 
-interface ProgressScreenProps {
-  onBack: () => void;
-}
+const ProgressPage = () => {
+  const navigate = useNavigate();
+  const { userData } = useUser();
 
-export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
   // Mock data - would come from backend in real app
   const progressData = {
     totalXP: 1250,
@@ -43,13 +45,19 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
 
   const levelProgress = ((progressData.totalXP - ((progressData.currentLevel - 1) * 500)) / 500) * 100;
 
+  if (!userData) {
+    return <Navigate to="/auth" />;
+  }
+
+  const onBack = () => navigate("/dashboard");
+
   return (
     <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="flex items-center mb-6">
-        <Button 
+        <Button
           onClick={onBack}
-          variant="ghost" 
+          variant="ghost"
           size="icon"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -116,7 +124,7 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
               </Badge>
             </div>
             <Progress value={(progressData.weeklyProgress / progressData.weeklyGoal) * 100} className="h-3" />
-            
+
             {/* Weekly Chart */}
             <div className="grid grid-cols-7 gap-2 mt-4">
               {weeklyData.map((day, index) => (
@@ -124,7 +132,7 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
                   <div className={`h-12 rounded-md flex items-end justify-center transition-smooth ${
                     day.completed ? 'bg-gradient-success' : 'bg-muted'
                   }`}>
-                    <div 
+                    <div
                       className={`w-full rounded-md transition-smooth ${
                         day.completed ? 'bg-success' : 'bg-muted-foreground'
                       }`}
@@ -151,7 +159,7 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
             <span className="font-semibold">{progressData.lessonsCompleted}/{progressData.totalLessons}</span>
           </div>
           <Progress value={(progressData.lessonsCompleted / progressData.totalLessons) * 100} className="h-2" />
-          
+
           <div className="flex justify-between items-center">
             <span>Skills</span>
             <span className="font-semibold">{progressData.skillsUnlocked}/{progressData.totalSkills}</span>
@@ -170,11 +178,11 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
         </CardHeader>
         <CardContent className="space-y-3">
           {achievements.map((achievement) => (
-            <div 
+            <div
               key={achievement.id}
               className={`flex items-center space-x-3 p-3 rounded-lg transition-smooth ${
-                achievement.unlocked 
-                  ? "bg-gradient-success/10 border border-success/20" 
+                achievement.unlocked
+                  ? "bg-gradient-success/10 border border-success/20"
                   : "bg-muted/30 opacity-60"
               }`}
             >
@@ -200,3 +208,5 @@ export const ProgressScreen = ({ onBack }: ProgressScreenProps) => {
     </div>
   );
 };
+
+export default ProgressPage;

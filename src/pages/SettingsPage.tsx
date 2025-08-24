@@ -4,18 +4,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Globe, Moon, Volume2, Bell, User, LogOut, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
+import { Navigate } from "react-router-dom";
 
-interface SettingsScreenProps {
-  currentLanguage: string;
-  onBack: () => void;
-  onLanguageChange: (language: string) => void;
-  onLogout: () => void;
-}
-
-export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLogout }: SettingsScreenProps) => {
+const SettingsPage = () => {
+  const navigate = useNavigate();
+  const { userData, setUserData } = useUser();
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState(true);
   const [sounds, setSounds] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  if (!userData) {
+    return <Navigate to="/auth" />;
+  }
+
+  const onBack = () => navigate("/dashboard");
+
+  const onLanguageChange = (newLanguage: string) => {
+    if (userData) {
+      setUserData({ ...userData, language: newLanguage });
+      toast({
+        title: "Language Changed",
+        description: `Now learning ${newLanguage}!`,
+      });
+    }
+  };
+
+  const onLogout = () => {
+    setUserData(null);
+    navigate("/auth");
+    toast({
+      title: "Logged out",
+      description: "See you soon!",
+    });
+  };
 
   const languages = [
     { value: "swahili", label: "Kiswahili 🇹🇿" },
@@ -33,7 +58,7 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
           label: "Learning Language",
           description: "Change your current learning language",
           type: "select",
-          value: currentLanguage,
+          value: userData.language,
           options: languages,
           onChange: onLanguageChange
         }
@@ -81,9 +106,9 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
     <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="flex items-center mb-6">
-        <Button 
+        <Button
           onClick={onBack}
-          variant="ghost" 
+          variant="ghost"
           size="icon"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -99,7 +124,7 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
               <User className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold">Learning Profile</h3>
+              <h3 className="text-lg font-semibold">{userData.name}</h3>
               <p className="text-sm text-muted-foreground">
                 Level 3 • 1,250 XP • 7-day streak
               </p>
@@ -124,18 +149,18 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
                   <h4 className="font-medium">{item.label}</h4>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
-                
+
                 {item.type === "switch" && (
                   <Switch
                     checked={item.value as boolean}
                     onCheckedChange={item.onChange as (checked: boolean) => void}
                   />
                 )}
-                
+
                 {item.type === "select" && (
                   <div className="w-40">
-                    <Select 
-                      value={item.value as string} 
+                    <Select
+                      value={item.value as string}
                       onValueChange={item.onChange as (value: string) => void}
                     >
                       <SelectTrigger>
@@ -172,14 +197,14 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
               <p className="text-sm text-muted-foreground">Learn how we protect your data</p>
             </div>
           </Button>
-          
+
           <Button variant="outline" className="w-full justify-start h-auto p-4">
             <div className="text-left">
               <h4 className="font-medium">Terms of Service</h4>
               <p className="text-sm text-muted-foreground">Read our terms and conditions</p>
             </div>
           </Button>
-          
+
           <Button variant="outline" className="w-full justify-start h-auto p-4">
             <div className="text-left">
               <h4 className="font-medium">Help & Support</h4>
@@ -192,9 +217,9 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
       {/* Logout Button */}
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <Button 
+          <Button
             onClick={onLogout}
-            variant="destructive" 
+            variant="destructive"
             className="w-full flex items-center gap-2"
           >
             <LogOut className="w-4 h-4" />
@@ -207,3 +232,5 @@ export const SettingsScreen = ({ currentLanguage, onBack, onLanguageChange, onLo
     </div>
   );
 };
+
+export default SettingsPage;

@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Volume2, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Navigate } from "react-router-dom";
 
 interface Question {
   id: number;
@@ -15,24 +19,18 @@ interface Question {
   explanation: string;
 }
 
-// Note: When using real database questions, correct answers are not exposed
-// to prevent cheating. The backend validates answers securely.
-
-interface LessonScreenProps {
-  language: string;
-  onComplete: (xp: number) => void;
-  onBack: () => void;
-}
-
-export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps) => {
+const LessonPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
+  const { userData } = useUser();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Mock lesson data - would come from backend in real app
-  const lessons = {
+  const lessons: { [key: string]: Question[] } = {
     swahili: [
       {
         id: 1,
@@ -86,7 +84,11 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
     ]
   };
 
-  const currentLessonQuestions = lessons[language as keyof typeof lessons] || lessons.swahili;
+  if (!userData) {
+    return <Navigate to="/auth" />;
+  }
+
+  const currentLessonQuestions = lessons[userData.language] || lessons.swahili;
   const question = currentLessonQuestions[currentQuestion];
   const progress = ((currentQuestion + 1) / currentLessonQuestions.length) * 100;
 
@@ -98,11 +100,11 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (answered) return;
-    
+
     setSelectedAnswer(answerIndex);
     setAnswered(true);
     setShowFeedback(true);
-    
+
     if (answerIndex === question.correct) {
       setScore(score + 1);
     }
@@ -117,9 +119,15 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
     } else {
       // Lesson complete
       const earnedXP = score * 10 + 10; // Base XP + bonus for correct answers
-      onComplete(earnedXP);
+      navigate("/dashboard");
+      toast({
+        title: "Lesson Complete! 🏆",
+        description: `You earned ${earnedXP} XP! Keep up the great work!`,
+      });
     }
   };
+
+  const onBack = () => navigate("/dashboard");
 
   const isCorrect = selectedAnswer === question.correct;
   const isLastQuestion = currentQuestion === currentLessonQuestions.length - 1;
@@ -128,18 +136,18 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
     <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button 
+        <Button
           onClick={onBack}
-          variant="ghost" 
+          variant="ghost"
           size="icon"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        
+
         <div className="flex-1 mx-4">
           <Progress value={progress} className="h-3" />
         </div>
-        
+
         <Badge variant="secondary">
           {currentQuestion + 1}/{currentLessonQuestions.length}
         </Badge>
@@ -150,7 +158,7 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
         <CardHeader className="text-center">
           <CardTitle className="text-xl">{question.question}</CardTitle>
           {question.audio && (
-            <Button 
+            <Button
               onClick={playAudio}
               variant="outline"
               size="sm"
@@ -161,12 +169,12 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
             </Button>
           )}
         </CardHeader>
-        
+
         <CardContent className="space-y-3">
           {question.options.map((option, index) => {
             let buttonVariant: "outline" | "success" | "destructive" = "outline";
             let className = "w-full p-4 text-left h-auto justify-start";
-            
+
             if (showFeedback && selectedAnswer !== null) {
               if (index === question.correct) {
                 buttonVariant = "success";
@@ -178,7 +186,7 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
             } else if (selectedAnswer === index) {
               className += " ring-2 ring-primary";
             }
-            
+
             return (
               <Button
                 key={index}
@@ -224,7 +232,7 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
 
       {/* Continue Button */}
       {showFeedback && (
-        <Button 
+        <Button
           onClick={handleNext}
           variant="hero"
           size="lg"
@@ -236,3 +244,5 @@ export const LessonScreen = ({ language, onComplete, onBack }: LessonScreenProps
     </div>
   );
 };
+
+export default LessonPage;

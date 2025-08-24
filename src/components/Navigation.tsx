@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Home, Trophy, BarChart3, Settings, Book } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
-interface NavigationProps {
-  currentScreen: string;
-  onNavigate: (screen: string) => void;
-}
+export const Navigation = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-export const Navigation = ({ currentScreen, onNavigate }: NavigationProps) => {
   const navItems = [
-    { id: "dashboard", label: "Home", icon: Home },
-    { id: "lesson", label: "Learn", icon: Book },
-    { id: "progress", label: "Progress", icon: BarChart3 },
-    { id: "leaderboard", label: "Leaderboard", icon: Trophy },
-    { id: "settings", label: "Settings", icon: Settings }
+    { id: "dashboard", label: "Home", icon: Home, path: "/dashboard" },
+    { id: "lesson", label: "Learn", icon: Book, path: "/lesson" },
+    { id: "progress", label: "Progress", icon: BarChart3, path: "/progress" },
+    { id: "leaderboard", label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
+    { id: "settings", label: "Settings", icon: Settings, path: "/settings" }
   ];
 
   return (
@@ -20,14 +19,14 @@ export const Navigation = ({ currentScreen, onNavigate }: NavigationProps) => {
       <div className="flex justify-around items-center h-16 px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentScreen === item.id;
-          
+          const isActive = location.pathname === item.path;
+
           return (
             <Button
               key={item.id}
               variant="ghost"
               size="sm"
-              onClick={() => onNavigate(item.id)}
+              onClick={() => navigate(item.path)}
               className={`flex flex-col items-center space-y-1 h-12 px-2 ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}

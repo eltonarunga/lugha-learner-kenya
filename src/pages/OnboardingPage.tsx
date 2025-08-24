@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import mascotImage from "@/assets/lugha-mascot.png";
+import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface OnboardingData {
   name: string;
@@ -11,17 +14,16 @@ interface OnboardingData {
   language: string;
 }
 
-interface OnboardingScreenProps {
-  onComplete: (data: OnboardingData) => void;
-}
-
-export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
+const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<OnboardingData>({
     name: "",
     age: "",
     language: ""
   });
+  const { userData, setUserData } = useUser();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const languages = [
     { value: "swahili", label: "Kiswahili 🇹🇿" },
@@ -33,7 +35,15 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      onComplete(formData);
+      // It's not letting me spread userData because it can be null.
+      // I need to provide a default value.
+      const defaultUserData = { name: "", age: "", language: "", email: "", isGuest: false };
+      setUserData({ ...(userData || defaultUserData), ...formData });
+      navigate("/dashboard");
+      toast({
+        title: "Welcome to Lugha Learner! 🎉",
+        description: `Ready to start learning ${formData.language}?`,
+      });
     }
   };
 
@@ -51,9 +61,9 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
       <Card className="w-full max-w-md shadow-card border-0">
         <CardHeader className="text-center pb-4">
           <div className="flex justify-center mb-4">
-            <img 
-              src={mascotImage} 
-              alt="Lugha Learner Mascot" 
+            <img
+              src={mascotImage}
+              alt="Lugha Learner Mascot"
               className="w-24 h-24 animate-bounce"
             />
           </div>
@@ -105,8 +115,8 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
                 <h3 className="text-lg font-semibold mb-2">Which language excites you?</h3>
                 <p className="text-sm text-muted-foreground">Choose your first language to master!</p>
               </div>
-              <Select 
-                value={formData.language} 
+              <Select
+                value={formData.language}
                 onValueChange={(value) => setFormData({ ...formData, language: value })}
               >
                 <SelectTrigger className="text-lg">
@@ -124,7 +134,7 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
           )}
 
           <div className="flex flex-col space-y-2">
-            <Button 
+            <Button
               onClick={handleNext}
               disabled={!canProceed()}
               variant="hero"
@@ -133,7 +143,7 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
             >
               {step === 3 ? "Start Learning! 🚀" : "Next"}
             </Button>
-            
+
             <div className="flex justify-center space-x-2 mt-4">
               {[1, 2, 3].map((i) => (
                 <div
@@ -150,3 +160,5 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
     </div>
   );
 };
+
+export default OnboardingPage;

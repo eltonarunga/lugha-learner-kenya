@@ -4,29 +4,52 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mascotImage from "@/assets/lugha-mascot.png";
+import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
-interface AuthScreenProps {
-  onLogin: (email: string) => void;
-  onGuestMode: () => void;
-}
-
-export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
+export const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
+  const { setUserData } = useUser();
+  const navigate = useNavigate();
 
   const handleLogin = () => {
     if (loginEmail && loginPassword) {
-      onLogin(loginEmail);
+      setUserData({
+        name: loginEmail.split('@')[0],
+        age: "25",
+        language: "swahili",
+        email: loginEmail,
+        isGuest: false
+      });
+      navigate("/onboarding");
     }
   };
 
   const handleSignup = () => {
     if (signupEmail && signupPassword && signupName) {
-      onLogin(signupEmail);
+        setUserData({
+            name: signupName,
+            age: "25",
+            language: "swahili",
+            email: signupEmail,
+            isGuest: false
+        });
+        navigate("/onboarding");
     }
+  };
+
+  const handleGuestMode = () => {
+    setUserData({
+      name: "Guest",
+      age: "25",
+      language: "swahili",
+      isGuest: true
+    });
+    navigate("/onboarding");
   };
 
   return (
@@ -34,9 +57,9 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
       <Card className="w-full max-w-md shadow-card border-0">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img 
-              src={mascotImage} 
-              alt="Lugha Learner Mascot" 
+            <img
+              src={mascotImage}
+              alt="Lugha Learner Mascot"
               className="w-20 h-20"
             />
           </div>
@@ -70,8 +93,8 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
                   onChange={(e) => setLoginPassword(e.target.value)}
                 />
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={handleLogin}
                 variant="hero"
                 size="lg"
@@ -80,7 +103,7 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
               >
                 Login
               </Button>
-              
+
               <Button variant="link" className="w-full text-sm">
                 Forgot your password?
               </Button>
@@ -107,8 +130,8 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
                   onChange={(e) => setSignupPassword(e.target.value)}
                 />
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={handleSignup}
                 variant="hero"
                 size="lg"
@@ -117,7 +140,7 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
               >
                 Create Account
               </Button>
-              
+
               <p className="text-xs text-center text-muted-foreground">
                 By signing up, you agree to our Terms of Service and Privacy Policy
               </p>
@@ -125,8 +148,8 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
           </Tabs>
 
           <div className="mt-6 pt-4 border-t">
-            <Button 
-              onClick={onGuestMode}
+            <Button
+              onClick={handleGuestMode}
               variant="outline"
               size="lg"
               className="w-full"
@@ -142,3 +165,5 @@ export const AuthScreen = ({ onLogin, onGuestMode }: AuthScreenProps) => {
     </div>
   );
 };
+
+export default AuthPage;

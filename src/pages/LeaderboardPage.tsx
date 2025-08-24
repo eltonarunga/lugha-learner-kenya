@@ -3,26 +3,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Trophy, Medal, Award, Crown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { Navigate } from "react-router-dom";
 
-interface LeaderboardScreenProps {
-  onBack: () => void;
-  currentUser: string;
-}
+const LeaderboardPage = () => {
+  const navigate = useNavigate();
+  const { userData } = useUser();
 
-export const LeaderboardScreen = ({ onBack, currentUser }: LeaderboardScreenProps) => {
+  if (!userData) {
+    return <Navigate to="/auth" />;
+  }
+
   // Mock leaderboard data - would come from backend in real app
   const leaderboardData = [
     { id: 1, name: "Amina K.", xp: 2150, streak: 15, level: 5, avatar: "AK", country: "🇰🇪" },
     { id: 2, name: "John M.", xp: 1890, streak: 12, level: 4, avatar: "JM", country: "🇰🇪" },
     { id: 3, name: "Grace W.", xp: 1675, streak: 8, level: 4, avatar: "GW", country: "🇰🇪" },
     { id: 4, name: "David K.", xp: 1450, streak: 10, level: 3, avatar: "DK", country: "🇰🇪" },
-    { id: 5, name: currentUser, xp: 1250, streak: 7, level: 3, avatar: currentUser.substring(0, 2).toUpperCase(), country: "🇰🇪" },
+    { id: 5, name: userData.name, xp: 1250, streak: 7, level: 3, avatar: userData.name.substring(0, 2).toUpperCase(), country: "🇰🇪" },
     { id: 6, name: "Sarah N.", xp: 1180, streak: 6, level: 3, avatar: "SN", country: "🇰🇪" },
     { id: 7, name: "Peter O.", xp: 1050, streak: 9, level: 2, avatar: "PO", country: "🇰🇪" },
     { id: 8, name: "Mary L.", xp: 980, streak: 4, level: 2, avatar: "ML", country: "🇰🇪" },
     { id: 9, name: "James R.", xp: 875, streak: 5, level: 2, avatar: "JR", country: "🇰🇪" },
     { id: 10, name: "Ruth A.", xp: 820, streak: 3, level: 2, avatar: "RA", country: "🇰🇪" }
-  ];
+  ].sort((a, b) => b.xp - a.xp);
 
   const getRankIcon = (position: number) => {
     switch (position) {
@@ -42,15 +47,17 @@ export const LeaderboardScreen = ({ onBack, currentUser }: LeaderboardScreenProp
     }
   };
 
-  const currentUserRank = leaderboardData.findIndex(user => user.name === currentUser) + 1;
+  const currentUserRank = leaderboardData.findIndex(user => user.name === userData.name) + 1;
+
+  const onBack = () => navigate("/dashboard");
 
   return (
     <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="flex items-center mb-6">
-        <Button 
+        <Button
           onClick={onBack}
-          variant="ghost" 
+          variant="ghost"
           size="icon"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -59,24 +66,27 @@ export const LeaderboardScreen = ({ onBack, currentUser }: LeaderboardScreenProp
       </div>
 
       {/* Current User Rank Card */}
-      <Card className="shadow-card mb-6 border-primary">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getRankColor(currentUserRank)}`}>
-                #{currentUserRank}
-              </div>
-              <div>
-                <h3 className="font-bold">Your Rank</h3>
-                <p className="text-sm text-muted-foreground">
-                  {leaderboardData[currentUserRank - 1]?.xp} XP • {leaderboardData[currentUserRank - 1]?.streak} day streak
-                </p>
-              </div>
+      {currentUserRank > 0 && (
+        <Card className="shadow-card mb-6 border-primary">
+            <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getRankColor(currentUserRank)}`}>
+                    #{currentUserRank}
+                </div>
+                <div>
+                    <h3 className="font-bold">Your Rank</h3>
+                    <p className="text-sm text-muted-foreground">
+                    {leaderboardData[currentUserRank - 1]?.xp} XP • {leaderboardData[currentUserRank - 1]?.streak} day streak
+                    </p>
+                </div>
+                </div>
+                <Badge variant="secondary">Level {leaderboardData[currentUserRank - 1]?.level}</Badge>
             </div>
-            <Badge variant="secondary">Level {leaderboardData[currentUserRank - 1]?.level}</Badge>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+        </Card>
+      )}
+
 
       {/* Top 3 Podium */}
       <Card className="shadow-card mb-6">
@@ -156,14 +166,14 @@ export const LeaderboardScreen = ({ onBack, currentUser }: LeaderboardScreenProp
         <CardContent className="space-y-2">
           {leaderboardData.map((user, index) => {
             const position = index + 1;
-            const isCurrentUser = user.name === currentUser;
-            
+            const isCurrentUser = user.name === userData.name;
+
             return (
               <div
                 key={user.id}
                 className={`flex items-center space-x-3 p-3 rounded-lg transition-smooth ${
-                  isCurrentUser 
-                    ? "bg-primary/10 border border-primary/20" 
+                  isCurrentUser
+                    ? "bg-primary/10 border border-primary/20"
                     : "bg-muted/20 hover:bg-muted/40"
                 }`}
               >
@@ -207,3 +217,5 @@ export const LeaderboardScreen = ({ onBack, currentUser }: LeaderboardScreenProp
     </div>
   );
 };
+
+export default LeaderboardPage;

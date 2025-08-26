@@ -6,28 +6,40 @@ import { ArrowLeft, Trophy, Medal, Award, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 const LeaderboardPage = () => {
   const navigate = useNavigate();
   const { userData } = useUser();
+  const { leaderboard, loading, error } = useLeaderboard();
 
   if (!userData) {
     return <Navigate to="/auth" />;
   }
 
-  // Mock leaderboard data - would come from backend in real app
-  const leaderboardData = [
-    { id: 1, name: "Amina K.", xp: 2150, streak: 15, level: 5, avatar: "AK", country: "🇰🇪" },
-    { id: 2, name: "John M.", xp: 1890, streak: 12, level: 4, avatar: "JM", country: "🇰🇪" },
-    { id: 3, name: "Grace W.", xp: 1675, streak: 8, level: 4, avatar: "GW", country: "🇰🇪" },
-    { id: 4, name: "David K.", xp: 1450, streak: 10, level: 3, avatar: "DK", country: "🇰🇪" },
-    { id: 5, name: userData.name, xp: 1250, streak: 7, level: 3, avatar: userData.name.substring(0, 2).toUpperCase(), country: "🇰🇪" },
-    { id: 6, name: "Sarah N.", xp: 1180, streak: 6, level: 3, avatar: "SN", country: "🇰🇪" },
-    { id: 7, name: "Peter O.", xp: 1050, streak: 9, level: 2, avatar: "PO", country: "🇰🇪" },
-    { id: 8, name: "Mary L.", xp: 980, streak: 4, level: 2, avatar: "ML", country: "🇰🇪" },
-    { id: 9, name: "James R.", xp: 875, streak: 5, level: 2, avatar: "JR", country: "🇰🇪" },
-    { id: 10, name: "Ruth A.", xp: 820, streak: 3, level: 2, avatar: "RA", country: "🇰🇪" }
-  ].sort((a, b) => b.xp - a.xp);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const getLevel = (xp: number) => Math.floor(xp / 500) + 1;
 
   const getRankIcon = (position: number) => {
     switch (position) {
@@ -47,7 +59,8 @@ const LeaderboardPage = () => {
     }
   };
 
-  const currentUserRank = leaderboardData.findIndex(user => user.name === userData.name) + 1;
+  const currentUserRank = leaderboard.findIndex(user => user.name === userData.name) + 1;
+  const currentUser = leaderboard.find(user => user.name === userData.name);
 
   const onBack = () => navigate("/dashboard");
 
@@ -77,11 +90,11 @@ const LeaderboardPage = () => {
                 <div>
                     <h3 className="font-bold">Your Rank</h3>
                     <p className="text-sm text-muted-foreground">
-                    {leaderboardData[currentUserRank - 1]?.xp} XP • {leaderboardData[currentUserRank - 1]?.streak} day streak
+                    {currentUser?.total_xp} XP • {currentUser?.current_streak} day streak
                     </p>
                 </div>
                 </div>
-                <Badge variant="secondary">Level {leaderboardData[currentUserRank - 1]?.level}</Badge>
+                <Badge variant="secondary">Level {currentUser ? getLevel(currentUser.total_xp) : 1}</Badge>
             </div>
             </CardContent>
         </Card>
@@ -99,61 +112,67 @@ const LeaderboardPage = () => {
         <CardContent>
           <div className="flex justify-center items-end space-x-4 mb-6">
             {/* 2nd Place */}
-            <div className="text-center">
-              <div className="relative">
-                <Avatar className="w-16 h-16 mx-auto border-4 border-gray-400">
-                  <AvatarFallback className="bg-gradient-to-r from-gray-300 to-gray-500 text-white font-bold">
-                    {leaderboardData[1].avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -top-2 -right-2">
-                  <Medal className="w-6 h-6 text-gray-400" />
+            {leaderboard[1] && (
+              <div className="text-center">
+                <div className="relative">
+                  <Avatar className="w-16 h-16 mx-auto border-4 border-gray-400">
+                    <AvatarFallback className="bg-gradient-to-r from-gray-300 to-gray-500 text-white font-bold">
+                      {leaderboard[1].avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -top-2 -right-2">
+                    <Medal className="w-6 h-6 text-gray-400" />
+                  </div>
                 </div>
+                <div className="bg-gray-400 h-20 w-16 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
+                  <span className="text-white font-bold text-xl">2</span>
+                </div>
+                <p className="text-sm font-semibold mt-2">{leaderboard[1].name}</p>
+                <p className="text-xs text-muted-foreground">{leaderboard[1].total_xp} XP</p>
               </div>
-              <div className="bg-gray-400 h-20 w-16 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
-                <span className="text-white font-bold text-xl">2</span>
-              </div>
-              <p className="text-sm font-semibold mt-2">{leaderboardData[1].name}</p>
-              <p className="text-xs text-muted-foreground">{leaderboardData[1].xp} XP</p>
-            </div>
+            )}
 
             {/* 1st Place */}
-            <div className="text-center">
-              <div className="relative">
-                <Avatar className="w-20 h-20 mx-auto border-4 border-yellow-500">
-                  <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold text-lg">
-                    {leaderboardData[0].avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -top-3 -right-2">
-                  <Crown className="w-8 h-8 text-yellow-500" />
+            {leaderboard[0] && (
+              <div className="text-center">
+                <div className="relative">
+                  <Avatar className="w-20 h-20 mx-auto border-4 border-yellow-500">
+                    <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold text-lg">
+                      {leaderboard[0].avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -top-3 -right-2">
+                    <Crown className="w-8 h-8 text-yellow-500" />
+                  </div>
                 </div>
+                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-24 w-20 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
+                  <span className="text-white font-bold text-2xl">1</span>
+                </div>
+                <p className="text-sm font-semibold mt-2">{leaderboard[0].name}</p>
+                <p className="text-xs text-muted-foreground">{leaderboard[0].total_xp} XP</p>
               </div>
-              <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-24 w-20 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
-                <span className="text-white font-bold text-2xl">1</span>
-              </div>
-              <p className="text-sm font-semibold mt-2">{leaderboardData[0].name}</p>
-              <p className="text-xs text-muted-foreground">{leaderboardData[0].xp} XP</p>
-            </div>
+            )}
 
             {/* 3rd Place */}
-            <div className="text-center">
-              <div className="relative">
-                <Avatar className="w-16 h-16 mx-auto border-4 border-amber-600">
-                  <AvatarFallback className="bg-gradient-to-r from-amber-400 to-amber-600 text-white font-bold">
-                    {leaderboardData[2].avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -top-2 -right-2">
-                  <Award className="w-6 h-6 text-amber-600" />
+            {leaderboard[2] && (
+              <div className="text-center">
+                <div className="relative">
+                  <Avatar className="w-16 h-16 mx-auto border-4 border-amber-600">
+                    <AvatarFallback className="bg-gradient-to-r from-amber-400 to-amber-600 text-white font-bold">
+                      {leaderboard[2].avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -top-2 -right-2">
+                    <Award className="w-6 h-6 text-amber-600" />
+                  </div>
                 </div>
+                <div className="bg-amber-600 h-16 w-16 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
+                  <span className="text-white font-bold text-xl">3</span>
+                </div>
+                <p className="text-sm font-semibold mt-2">{leaderboard[2].name}</p>
+                <p className="text-xs text-muted-foreground">{leaderboard[2].total_xp} XP</p>
               </div>
-              <div className="bg-amber-600 h-16 w-16 mx-auto mt-2 rounded-t-lg flex items-end justify-center pb-2">
-                <span className="text-white font-bold text-xl">3</span>
-              </div>
-              <p className="text-sm font-semibold mt-2">{leaderboardData[2].name}</p>
-              <p className="text-xs text-muted-foreground">{leaderboardData[2].xp} XP</p>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -164,9 +183,10 @@ const LeaderboardPage = () => {
           <CardTitle>All Learners</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {leaderboardData.map((user, index) => {
+          {leaderboard.map((user, index) => {
             const position = index + 1;
             const isCurrentUser = user.name === userData.name;
+            const level = getLevel(user.total_xp);
 
             return (
               <div
@@ -194,18 +214,17 @@ const LeaderboardPage = () => {
                     <span className={`font-semibold ${isCurrentUser ? 'text-primary' : ''}`}>
                       {user.name}
                     </span>
-                    <span>{user.country}</span>
                     {isCurrentUser && (
                       <Badge variant="secondary" className="text-xs">You</Badge>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {user.xp} XP • {user.streak} day streak
+                    {user.total_xp} XP • {user.current_streak} day streak
                   </p>
                 </div>
 
                 <Badge variant="outline">
-                  Level {user.level}
+                  Level {level}
                 </Badge>
               </div>
             );

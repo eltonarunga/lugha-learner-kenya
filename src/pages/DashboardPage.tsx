@@ -45,7 +45,14 @@ const DashboardPage = () => {
     return <Navigate to="/auth" />;
   }
 
-  const onStartLesson = () => navigate("/lesson");
+  const onStartLesson = (lessonId?: string) => {
+    if (lessonId) {
+      navigate(`/lesson?id=${lessonId}`);
+    } else {
+      // Fallback to first available lesson
+      navigate("/lesson?id=default");
+    }
+  };
   const onViewProgress = () => navigate("/progress");
   const onViewLeaderboard = () => navigate("/leaderboard");
 
@@ -145,7 +152,7 @@ const DashboardPage = () => {
               </div>
               {!lesson.completed && (
                 <Button
-                  onClick={onStartLesson}
+                  onClick={() => onStartLesson(`lesson-${lesson.id}`)}
                   variant="lesson"
                   size="sm"
                   className="flex items-center gap-1"

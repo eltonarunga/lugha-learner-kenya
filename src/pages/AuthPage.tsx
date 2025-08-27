@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mascotImage from "@/assets/lugha-mascot.png";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -13,32 +15,84 @@ export const AuthPage = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
+  const [loading, setLoading] = useState(false);
   const { setUserData } = useUser();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleLogin = () => {
-    if (loginEmail && loginPassword) {
-      setUserData({
-        name: loginEmail.split('@')[0],
-        age: "25",
-        language: "swahili",
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPassword) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
-        isGuest: false
+        password: loginPassword,
       });
-      navigate("/onboarding");
+
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        navigate("/dashboard");
+        toast({
+          title: "Welcome back!",
+          description: "Successfully logged in.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSignup = () => {
-    if (signupEmail && signupPassword && signupName) {
-        setUserData({
+  const handleSignup = async () => {
+    if (!signupEmail || !signupPassword || !signupName) return;
+    
+    setLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email: signupEmail,
+        password: signupPassword,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
             name: signupName,
-            age: "25",
-            language: "swahili",
-            email: signupEmail,
-            isGuest: false
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Signup Failed",
+          description: error.message,
+          variant: "destructive",
         });
+      } else {
         navigate("/onboarding");
+        toast({
+          title: "Account Created!",
+          description: "Welcome to Lugha Learner!",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,9 +153,9 @@ export const AuthPage = () => {
                 variant="hero"
                 size="lg"
                 className="w-full"
-                disabled={!loginEmail || !loginPassword}
+                disabled={!loginEmail || !loginPassword || loading}
               >
-                Login
+                {loading ? "Signing In..." : "Login"}
               </Button>
 
               <Button variant="link" className="w-full text-sm">
@@ -136,9 +190,9 @@ export const AuthPage = () => {
                 variant="hero"
                 size="lg"
                 className="w-full"
-                disabled={!signupEmail || !signupPassword || !signupName}
+                disabled={!signupEmail || !signupPassword || !signupName || loading}
               >
-                Create Account
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">

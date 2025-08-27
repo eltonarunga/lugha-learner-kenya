@@ -2,9 +2,13 @@ import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
 
 const Index = () => {
-  const { userData } = useUser();
+  const { userData, loading, user } = useUser();
 
-  if (userData) {
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (userData || user) {
     return <Navigate to="/dashboard" />;
   }
 

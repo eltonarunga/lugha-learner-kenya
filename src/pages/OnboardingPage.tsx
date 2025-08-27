@@ -7,6 +7,7 @@ import mascotImage from "@/assets/lugha-mascot.png";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OnboardingData {
   name: string;
@@ -31,14 +32,48 @@ const OnboardingPage = () => {
     { value: "luo", label: "Dholuo 🇰🇪" }
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      // It's not letting me spread userData because it can be null.
-      // I need to provide a default value.
-      const defaultUserData = { name: "", age: "", language: "", email: "", isGuest: false };
-      setUserData({ ...(userData || defaultUserData), ...formData });
+      // Save user data to database if authenticated, otherwise just local state
+      if (userData?.isGuest) {
+        const defaultUserData = { name: "", age: "", language: "", email: "", isGuest: false };
+        setUserData({ ...(userData || defaultUserData), ...formData });
+      } else {
+        // Save to Supabase for authenticated users
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase
+              .from('profiles')
+              .upsert({
+                user_id: user.id,
+                name: formData.name,
+                age: formData.age,
+                selected_language: formData.language,
+                email: user.email,
+              });
+            
+            setUserData({
+              name: formData.name,
+              age: formData.age,
+              language: formData.language,
+              email: user.email || '',
+              isGuest: false
+            });
+          }
+        } catch (error) {
+          console.error('Error saving user profile:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save profile. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       navigate("/dashboard");
       toast({
         title: "Welcome to Lugha Learner! 🎉",

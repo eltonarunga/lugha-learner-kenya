@@ -6,47 +6,46 @@ import { ArrowLeft, Trophy, Star, Target, Calendar, BookOpen } from "lucide-reac
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
+import { useUserStats } from "@/hooks/useUserStats";
+import { useUserAchievements } from "@/hooks/useUserAchievements";
 
 const ProgressPage = () => {
   const navigate = useNavigate();
   const { userData } = useUser();
+  const { stats, loading: statsLoading } = useUserStats();
+  const { achievements, loading: achievementsLoading } = useUserAchievements();
 
-  // Mock data - would come from backend in real app
-  const progressData = {
-    totalXP: 1250,
-    currentLevel: 3,
-    nextLevelXP: 1500,
-    streakDays: 7,
-    lessonsCompleted: 12,
-    totalLessons: 45,
-    skillsUnlocked: 5,
-    totalSkills: 12,
-    weeklyGoal: 350,
-    weeklyProgress: 280
-  };
+  const weeklyGoal = 350;
+  const totalLessons = 50; // Could come from lessons count
+  const totalSkills = 12; // Could come from skills/categories count
 
   const weeklyData = [
-    { day: "Mon", xp: 50, completed: true },
-    { day: "Tue", xp: 40, completed: true },
-    { day: "Wed", xp: 35, completed: true },
-    { day: "Thu", xp: 45, completed: true },
-    { day: "Fri", xp: 60, completed: true },
-    { day: "Sat", xp: 50, completed: true },
-    { day: "Sun", xp: 0, completed: false }
+    { day: "Mon", xp: Math.floor(stats.weeklyProgress * 0.15), completed: true },
+    { day: "Tue", xp: Math.floor(stats.weeklyProgress * 0.12), completed: true },
+    { day: "Wed", xp: Math.floor(stats.weeklyProgress * 0.10), completed: true },
+    { day: "Thu", xp: Math.floor(stats.weeklyProgress * 0.13), completed: true },
+    { day: "Fri", xp: Math.floor(stats.weeklyProgress * 0.17), completed: true },
+    { day: "Sat", xp: Math.floor(stats.weeklyProgress * 0.15), completed: true },
+    { day: "Sun", xp: Math.floor(stats.weeklyProgress * 0.18), completed: false }
   ];
 
-  const achievements = [
-    { id: 1, title: "First Steps", description: "Complete your first lesson", icon: "🎯", unlocked: true, date: "2 days ago" },
-    { id: 2, title: "Week Warrior", description: "7-day learning streak", icon: "🔥", unlocked: true, date: "Today!" },
-    { id: 3, title: "Quick Learner", description: "Complete 5 lessons in one day", icon: "⚡", unlocked: false, date: "" },
-    { id: 4, title: "Vocabulary Master", description: "Learn 100 new words", icon: "📚", unlocked: false, date: "" },
-    { id: 5, title: "Perfect Score", description: "Get 100% on a lesson", icon: "💯", unlocked: true, date: "3 days ago" }
-  ];
-
-  const levelProgress = ((progressData.totalXP - ((progressData.currentLevel - 1) * 500)) / 500) * 100;
+  const nextLevelXP = stats.level * 500;
+  const currentLevelXP = (stats.level - 1) * 500;
+  const levelProgress = ((stats.totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 
   if (!userData) {
     return <Navigate to="/auth" />;
+  }
+
+  if (statsLoading || achievementsLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading progress...</p>
+        </div>
+      </div>
+    );
   }
 
   const onBack = () => navigate("/dashboard");
@@ -70,15 +69,15 @@ const ProgressPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-primary" />
-            Level {progressData.currentLevel}
+            Level {stats.level}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <Progress value={levelProgress} className="h-4" />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{progressData.totalXP} XP</span>
-              <span>{progressData.nextLevelXP} XP to next level</span>
+              <span>{stats.totalXP} XP</span>
+              <span>{nextLevelXP} XP to next level</span>
             </div>
           </div>
         </CardContent>
@@ -90,7 +89,7 @@ const ProgressPage = () => {
           <CardContent className="p-4 text-center">
             <div className="flex flex-col items-center space-y-2">
               <Calendar className="w-6 h-6 text-warning" />
-              <p className="text-2xl font-bold text-warning">{progressData.streakDays}</p>
+              <p className="text-2xl font-bold text-warning">{stats.streak}</p>
               <p className="text-sm text-muted-foreground">Day Streak</p>
             </div>
           </CardContent>
@@ -100,7 +99,7 @@ const ProgressPage = () => {
           <CardContent className="p-4 text-center">
             <div className="flex flex-col items-center space-y-2">
               <BookOpen className="w-6 h-6 text-accent" />
-              <p className="text-2xl font-bold text-accent">{progressData.lessonsCompleted}</p>
+              <p className="text-2xl font-bold text-accent">{stats.lessonsCompleted}</p>
               <p className="text-sm text-muted-foreground">Lessons Done</p>
             </div>
           </CardContent>
@@ -118,12 +117,12 @@ const ProgressPage = () => {
         <CardContent>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold">{progressData.weeklyProgress} / {progressData.weeklyGoal} XP</span>
+              <span className="text-lg font-semibold">{stats.weeklyProgress} / {weeklyGoal} XP</span>
               <Badge variant="secondary">
-                {Math.round((progressData.weeklyProgress / progressData.weeklyGoal) * 100)}%
+                {Math.round((stats.weeklyProgress / weeklyGoal) * 100)}%
               </Badge>
             </div>
-            <Progress value={(progressData.weeklyProgress / progressData.weeklyGoal) * 100} className="h-3" />
+            <Progress value={(stats.weeklyProgress / weeklyGoal) * 100} className="h-3" />
 
             {/* Weekly Chart */}
             <div className="grid grid-cols-7 gap-2 mt-4">
@@ -156,15 +155,15 @@ const ProgressPage = () => {
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center">
             <span>Lessons</span>
-            <span className="font-semibold">{progressData.lessonsCompleted}/{progressData.totalLessons}</span>
+            <span className="font-semibold">{stats.lessonsCompleted}/{totalLessons}</span>
           </div>
-          <Progress value={(progressData.lessonsCompleted / progressData.totalLessons) * 100} className="h-2" />
+          <Progress value={(stats.lessonsCompleted / totalLessons) * 100} className="h-2" />
 
           <div className="flex justify-between items-center">
             <span>Skills</span>
-            <span className="font-semibold">{progressData.skillsUnlocked}/{progressData.totalSkills}</span>
+            <span className="font-semibold">{Math.floor(stats.lessonsCompleted / 4)}/{totalSkills}</span>
           </div>
-          <Progress value={(progressData.skillsUnlocked / progressData.totalSkills) * 100} className="h-2" />
+          <Progress value={(Math.floor(stats.lessonsCompleted / 4) / totalSkills) * 100} className="h-2" />
         </CardContent>
       </Card>
 
@@ -177,32 +176,40 @@ const ProgressPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {achievements.map((achievement) => (
-            <div
-              key={achievement.id}
-              className={`flex items-center space-x-3 p-3 rounded-lg transition-smooth ${
-                achievement.unlocked
-                  ? "bg-gradient-success/10 border border-success/20"
-                  : "bg-muted/30 opacity-60"
-              }`}
-            >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
-                achievement.unlocked ? "bg-gradient-success" : "bg-muted"
-              }`}>
-                {achievement.icon}
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold">{achievement.title}</h4>
-                <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                {achievement.unlocked && achievement.date && (
-                  <p className="text-xs text-success font-medium mt-1">{achievement.date}</p>
+          {achievements.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">
+              Complete lessons to unlock achievements!
+            </p>
+          ) : (
+            achievements.map((achievement) => (
+              <div
+                key={achievement.id}
+                className={`flex items-center space-x-3 p-3 rounded-lg transition-smooth ${
+                  achievement.earned
+                    ? "bg-gradient-success/10 border border-success/20"
+                    : "bg-muted/30 opacity-60"
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+                  achievement.earned ? "bg-gradient-success" : "bg-muted"
+                }`}>
+                  {achievement.icon}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold">{achievement.name}</h4>
+                  <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                  {achievement.earned && achievement.earned_at && (
+                    <p className="text-xs text-success font-medium mt-1">
+                      Earned {new Date(achievement.earned_at).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                {achievement.earned && (
+                  <Badge variant="secondary">✓</Badge>
                 )}
               </div>
-              {achievement.unlocked && (
-                <Badge variant="secondary">✓</Badge>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </CardContent>
       </Card>
     </div>

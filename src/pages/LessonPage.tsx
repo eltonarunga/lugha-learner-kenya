@@ -34,15 +34,15 @@ const LessonPage = () => {
   const currentLesson = lessons.find(lesson => lesson.id === lessonId);
 
   useEffect(() => {
-    // Simulate fetching correct answers from a secure endpoint
-    // In reality, this would be done after each answer submission
+    // Note: In production, correct answers would be validated on the backend
+    // For demo purposes, we simulate this by picking the first option as correct
     if (questions.length > 0) {
-      const mockCorrectAnswers: { [questionId: string]: number } = {};
-      questions.forEach((q, index) => {
-        // Mock correct answers - in reality these come from secure backend
-        mockCorrectAnswers[q.id] = index === 0 ? 0 : index === 1 ? 1 : 2;
+      const demoCorrectAnswers: { [questionId: string]: number } = {};
+      questions.forEach((q) => {
+        // For demo: first option is always correct
+        demoCorrectAnswers[q.id] = 0;
       });
-      setCorrectAnswers(mockCorrectAnswers);
+      setCorrectAnswers(demoCorrectAnswers);
     }
   }, [questions]);
 

@@ -6,21 +6,16 @@ import { Trophy, Flame, Star, Play, Target, Calendar } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import { useLessons } from "@/hooks/useLessons";
+import { useUserStats } from "@/hooks/useUserStats";
+import { useUserAchievements } from "@/hooks/useUserAchievements";
 
 const DashboardPage = () => {
   const { userData } = useUser();
   const navigate = useNavigate();
-
-  // Mock data - would come from backend in real app
-  const userStats = {
-    xp: 1250,
-    streak: 7,
-    level: 3,
-    totalLessons: 45,
-    completedLessons: 12,
-    todayGoal: 50,
-    todayProgress: 30
-  };
+  const { lessons, loading: lessonsLoading } = useLessons(userData?.language);
+  const { stats, loading: statsLoading } = useUserStats();
+  const { achievements, loading: achievementsLoading } = useUserAchievements();
 
   const languageLabels: { [key: string]: string } = {
     swahili: "Kiswahili",
@@ -28,21 +23,21 @@ const DashboardPage = () => {
     luo: "Dholuo"
   };
 
-  const todayLessons = [
-    { id: 1, title: "Basic Greetings", completed: true, xp: 25 },
-    { id: 2, title: "Family Members", completed: true, xp: 30 },
-    { id: 3, title: "Numbers 1-10", completed: false, xp: 25 },
-    { id: 4, title: "Colors", completed: false, xp: 30 }
-  ];
-
-  const achievements = [
-    { id: 1, title: "First Lesson", icon: "🎯", unlocked: true },
-    { id: 2, title: "Week Warrior", icon: "🔥", unlocked: true },
-    { id: 3, title: "Quick Learner", icon: "⚡", unlocked: false }
-  ];
+  const todayGoal = 50;
 
   if (!userData) {
     return <Navigate to="/auth" />;
+  }
+
+  if (lessonsLoading || statsLoading || achievementsLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   const onStartLesson = (lessonId?: string) => {
@@ -74,7 +69,7 @@ const DashboardPage = () => {
           <CardContent className="p-4">
             <div className="flex flex-col items-center space-y-1">
               <Flame className="w-6 h-6 text-warning" />
-              <p className="text-2xl font-bold text-warning">{userStats.streak}</p>
+              <p className="text-2xl font-bold text-warning">{stats.streak}</p>
               <p className="text-xs text-muted-foreground">Day Streak</p>
             </div>
           </CardContent>
@@ -84,7 +79,7 @@ const DashboardPage = () => {
           <CardContent className="p-4">
             <div className="flex flex-col items-center space-y-1">
               <Star className="w-6 h-6 text-primary" />
-              <p className="text-2xl font-bold text-primary">{userStats.xp}</p>
+              <p className="text-2xl font-bold text-primary">{stats.totalXP}</p>
               <p className="text-xs text-muted-foreground">Total XP</p>
             </div>
           </CardContent>
@@ -94,7 +89,7 @@ const DashboardPage = () => {
           <CardContent className="p-4">
             <div className="flex flex-col items-center space-y-1">
               <Trophy className="w-6 h-6 text-accent" />
-              <p className="text-2xl font-bold text-accent">{userStats.level}</p>
+              <p className="text-2xl font-bold text-accent">{stats.level}</p>
               <p className="text-xs text-muted-foreground">Level</p>
             </div>
           </CardContent>
@@ -109,13 +104,13 @@ const DashboardPage = () => {
               <Target className="w-5 h-5 text-success" />
               Daily Goal
             </CardTitle>
-            <Badge variant="secondary">{userStats.todayProgress}/{userStats.todayGoal} XP</Badge>
+            <Badge variant="secondary">{stats.todayProgress}/{todayGoal} XP</Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <Progress value={(userStats.todayProgress / userStats.todayGoal) * 100} className="h-3" />
+          <Progress value={(stats.todayProgress / todayGoal) * 100} className="h-3" />
           <p className="text-sm text-muted-foreground mt-2">
-            {userStats.todayGoal - userStats.todayProgress} XP to reach your daily goal!
+            {todayGoal - stats.todayProgress} XP to reach your daily goal!
           </p>
         </CardContent>
       </Card>
@@ -130,29 +125,27 @@ const DashboardPage = () => {
           <CardDescription>Complete lessons to earn XP and maintain your streak!</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {todayLessons.map((lesson) => (
-            <div
-              key={lesson.id}
-              className={`flex items-center justify-between p-3 rounded-lg border transition-smooth ${
-                lesson.completed
-                  ? "bg-success/10 border-success/20"
-                  : "bg-muted/50 border-border hover:bg-muted/80"
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  lesson.completed ? "bg-success text-success-foreground" : "bg-muted"
-                }`}>
-                  {lesson.completed ? "✓" : lesson.id}
+          {lessons.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">
+              No lessons available yet. Check back soon!
+            </p>
+          ) : (
+            lessons.slice(0, 4).map((lesson, index) => (
+              <div
+                key={lesson.id}
+                className="flex items-center justify-between p-3 rounded-lg border transition-smooth bg-muted/50 border-border hover:bg-muted/80"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="font-medium">{lesson.title}</p>
+                    <p className="text-sm text-muted-foreground">+{lesson.xp_reward} XP</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{lesson.title}</p>
-                  <p className="text-sm text-muted-foreground">+{lesson.xp} XP</p>
-                </div>
-              </div>
-              {!lesson.completed && (
                 <Button
-                  onClick={() => onStartLesson(`lesson-${lesson.id}`)}
+                  onClick={() => onStartLesson(lesson.id)}
                   variant="lesson"
                   size="sm"
                   className="flex items-center gap-1"
@@ -160,9 +153,9 @@ const DashboardPage = () => {
                   <Play className="w-4 h-4" />
                   Start
                 </Button>
-              )}
-            </div>
-          ))}
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -173,19 +166,25 @@ const DashboardPage = () => {
         </CardHeader>
         <CardContent>
           <div className="flex space-x-4">
-            {achievements.map((achievement) => (
-              <div
-                key={achievement.id}
-                className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-smooth ${
-                  achievement.unlocked
-                    ? "bg-gradient-success text-success-foreground shadow-celebration"
-                    : "bg-muted/50 opacity-50"
-                }`}
-              >
-                <span className="text-2xl">{achievement.icon}</span>
-                <p className="text-xs text-center font-medium">{achievement.title}</p>
-              </div>
-            ))}
+            {achievements.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4 w-full">
+                Complete lessons to unlock achievements!
+              </p>
+            ) : (
+              achievements.slice(0, 3).map((achievement) => (
+                <div
+                  key={achievement.id}
+                  className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-smooth ${
+                    achievement.earned
+                      ? "bg-gradient-success text-success-foreground shadow-celebration"
+                      : "bg-muted/50 opacity-50"
+                  }`}
+                >
+                  <span className="text-2xl">{achievement.icon}</span>
+                  <p className="text-xs text-center font-medium">{achievement.name}</p>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface AnswerSubmission {
   questionId: string;
   selectedAnswer: number;
-  isCorrect: boolean;
+  isCorrect: boolean; // Not used anymore, determined by server
   timeSpent?: number;
 }
 
@@ -17,11 +17,24 @@ export const useAnswerSubmission = () => {
     setError(null);
 
     try {
-      // In a real app, you would submit the answer to check correctness
-      // For now, we'll just simulate the submission
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Use secure server-side answer validation
+      const { data, error } = await supabase.rpc('check_answer', {
+        p_question_id: submission.questionId,
+        p_selected_answer: submission.selectedAnswer
+      });
+
+      if (error) throw error;
+
+      const result = data?.[0];
+      if (!result) throw new Error('No result returned from server');
       
-      return { success: true, isCorrect: submission.isCorrect };
+      return { 
+        success: true, 
+        isCorrect: result.is_correct,
+        correctAnswer: result.correct_answer,
+        explanation: result.explanation,
+        xpEarned: result.xp_earned
+      };
     } catch (err) {
       console.error('Error submitting answer:', err);
       setError('Failed to submit answer');
@@ -31,34 +44,28 @@ export const useAnswerSubmission = () => {
     }
   };
 
-  const submitLessonCompletion = async (lessonId: string, score: number, xpEarned: number) => {
+  const submitLessonCompletion = async (lessonId: string, score: number, languageCode: string = 'swahili') => {
     setSubmitting(true);
     setError(null);
 
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('User not authenticated');
+      // Use secure server-side lesson completion
+      const { data, error } = await supabase.rpc('complete_lesson', {
+        p_lesson_id: lessonId,
+        p_score: score,
+        p_language_code: languageCode
+      });
 
-      // Update or create user progress
-      const { error: progressError } = await supabase
-        .from('user_progress')
-        .upsert({
-          user_id: user.data.user.id,
-          lesson_id: lessonId,
-          language_code: 'swahili', // This should come from user context
-          score,
-          is_completed: true,
-          completed_at: new Date().toISOString(),
-          attempts: 1 // In real app, increment existing attempts
-        });
+      if (error) throw error;
 
-      if (progressError) throw progressError;
+      const result = data?.[0];
+      if (!result) throw new Error('No result returned from server');
 
-      // Note: XP updates would be handled via database triggers or separate endpoint
-      // For now, just log the XP earned
-      console.log(`User earned ${xpEarned} XP for completing lesson ${lessonId}`);
-
-      return { success: true };
+      return { 
+        success: result.success,
+        totalXp: result.total_xp_earned,
+        lessonXp: result.lesson_xp
+      };
     } catch (err) {
       console.error('Error submitting lesson completion:', err);
       setError('Failed to save progress');

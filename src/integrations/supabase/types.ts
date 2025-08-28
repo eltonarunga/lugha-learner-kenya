@@ -304,6 +304,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_answer: {
+        Args: { p_question_id: string; p_selected_answer: number }
+        Returns: {
+          correct_answer: number
+          explanation: string
+          is_correct: boolean
+          xp_earned: number
+        }[]
+      }
+      complete_lesson: {
+        Args: { p_language_code: string; p_lesson_id: string; p_score: number }
+        Returns: {
+          lesson_xp: number
+          success: boolean
+          total_xp_earned: number
+        }[]
+      }
+      get_public_leaderboard: {
+        Args: { p_limit?: number }
+        Returns: {
+          current_streak: number
+          name: string
+          rank: number
+          total_xp: number
+        }[]
+      }
       get_public_questions: {
         Args: { lesson_id: string }
         Returns: {

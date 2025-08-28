@@ -105,19 +105,27 @@ const LessonPage = () => {
 
     setSelectedAnswer(answerIndex);
     setAnswered(true);
-    setShowFeedback(true);
 
-    const isCorrect = answerIndex === correctAnswers[question.id];
-    if (isCorrect) {
+    // Submit answer to secure backend for validation
+    const result = await submitAnswer({
+      questionId: question.id,
+      selectedAnswer: answerIndex,
+      isCorrect: false // This will be determined by the server
+    });
+
+    if (result.success && result.isCorrect) {
       setScore(score + 1);
     }
 
-    // Submit answer to backend
-    await submitAnswer({
-      questionId: question.id,
-      selectedAnswer: answerIndex,
-      isCorrect
-    });
+    // Update correct answers based on server response
+    if (result.correctAnswer !== undefined) {
+      setCorrectAnswers(prev => ({
+        ...prev,
+        [question.id]: result.correctAnswer
+      }));
+    }
+
+    setShowFeedback(true);
   };
 
   const handleNext = async () => {
@@ -130,14 +138,14 @@ const LessonPage = () => {
       // Lesson complete
       const earnedXP = (currentLesson?.xp_reward || 10) + (score * 5); // Base XP + bonus for correct answers
       
-      const result = await submitLessonCompletion(lessonId, score, earnedXP);
+      const result = await submitLessonCompletion(lessonId, score, userData?.language || 'swahili');
       
       navigate("/dashboard");
       
       if (result.success) {
         toast({
           title: "Lesson Complete! 🏆",
-          description: `You earned ${earnedXP} XP! Keep up the great work!`,
+          description: `You earned ${result.lessonXp || 0} XP! Total XP: ${result.totalXp || 0}`,
         });
       } else {
         toast({

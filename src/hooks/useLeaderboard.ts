@@ -21,18 +21,19 @@ export const useLeaderboard = () => {
       setError(null);
 
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, name, total_xp, current_streak')
-          .order('total_xp', { ascending: false })
-          .limit(50);
+        const { data, error } = await supabase.rpc('get_public_leaderboard', {
+          p_limit: 50
+        });
 
         if (error) throw error;
 
-        const leaderboardData = (data || []).map((user, index) => ({
-          ...user,
-          avatar: user.name.substring(0, 2).toUpperCase(),
-          position: index + 1
+        const leaderboardData = (data || []).map((entry: any) => ({
+          id: entry.name, // Use name as id for display purposes
+          name: entry.name,
+          total_xp: entry.total_xp,
+          current_streak: entry.current_streak,
+          avatar: entry.name.substring(0, 2).toUpperCase(),
+          position: entry.rank
         }));
 
         setLeaderboard(leaderboardData);

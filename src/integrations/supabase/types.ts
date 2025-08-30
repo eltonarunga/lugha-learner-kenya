@@ -349,11 +349,14 @@ export type Database = {
         Args: { lesson_id: string }
         Returns: {
           audio_url: string
+          cultural_meaning: string
           id: string
           image_url: string
+          language_origin: string
           lesson_id: string
           options: string[]
           order_index: number
+          proverb_text: string
           question_text: string
         }[]
       }

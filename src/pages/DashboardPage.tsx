@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Flame, Star, Play, Target, Calendar } from "lucide-react";
+import { Trophy, Flame, Star, Play, Target, Calendar, BookOpen, Sparkles } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
@@ -19,8 +19,23 @@ const DashboardPage = () => {
 
   const languageLabels: { [key: string]: string } = {
     swahili: "Kiswahili",
-    kikuyu: "Gĩkũyũ",
-    luo: "Dholuo"
+    kikuyu: "Gĩkũyũ", 
+    luo: "Dholuo",
+    nandi: "Kalenjin"
+  };
+
+  const getLessonTypeIcon = (type?: string) => {
+    switch (type) {
+      case 'proverbs': return <Sparkles className="w-4 h-4" />;
+      default: return <BookOpen className="w-4 h-4" />;
+    }
+  };
+
+  const getLessonTypeBadge = (type?: string) => {
+    switch (type) {
+      case 'proverbs': return <Badge variant="secondary" className="text-xs">Wisdom</Badge>;
+      default: return <Badge variant="outline" className="text-xs">Learn</Badge>;
+    }
   };
 
   const todayGoal = 50;
@@ -134,14 +149,22 @@ const DashboardPage = () => {
               <div
                 key={lesson.id}
                 className="flex items-center justify-between p-3 rounded-lg border transition-smooth bg-muted/50 border-border hover:bg-muted/80"
-              >
+               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted">
-                    {index + 1}
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10">
+                    {getLessonTypeIcon(lesson.lesson_type)}
                   </div>
-                  <div>
-                    <p className="font-medium">{lesson.title}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium">{lesson.title}</p>
+                      {getLessonTypeBadge(lesson.lesson_type)}
+                    </div>
                     <p className="text-sm text-muted-foreground">+{lesson.xp_reward} XP</p>
+                    {lesson.cultural_context && (
+                      <p className="text-xs text-muted-foreground italic mt-1">
+                        {lesson.cultural_context}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <Button

@@ -10,6 +10,8 @@ export interface Lesson {
   order_index: number;
   xp_reward: number;
   is_active: boolean;
+  lesson_type?: string;
+  cultural_context?: string;
 }
 
 export const useLessons = (languageCode?: string) => {

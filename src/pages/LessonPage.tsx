@@ -12,6 +12,7 @@ import { useQuestions, Question } from "@/hooks/useQuestions";
 import { useAnswerSubmission } from "@/hooks/useAnswerSubmission";
 import InteractiveMascot from "@/components/InteractiveMascot";
 import { useLessons } from "@/hooks/useLessons";
+import ProverbCard from "@/components/ProverbCard";
 
 const LessonPage = () => {
   const [searchParams] = useSearchParams();
@@ -190,6 +191,17 @@ const LessonPage = () => {
         encouragementMessage={currentLesson?.title ? `Let's learn ${currentLesson.title}!` : "You can do this!"}
       />
 
+      {/* Proverb Display (for proverb lessons) */}
+      {currentLesson?.lesson_type === 'proverbs' && question.proverb_text && (
+        <ProverbCard 
+          proverb={question.proverb_text}
+          meaning={question.cultural_meaning || "Traditional wisdom"}
+          language={question.language_origin || currentLesson.language_code}
+          origin={question.language_origin || currentLesson.language_code}
+          className="mb-6"
+        />
+      )}
+
       {/* Question Card */}
       <Card className="shadow-card mb-6">
         <CardHeader className="text-center">
@@ -259,8 +271,10 @@ const LessonPage = () => {
                   {isCorrect ? "Correct! 🎉" : "Not quite right 😔"}
                 </h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {/* In real app, explanation would come from secure backend after answer submission */}
-                  Great job! Keep learning to master this language.
+                  {currentLesson?.lesson_type === 'proverbs' ? 
+                    "Understanding cultural wisdom helps you connect deeper with the language and its people." :
+                    "Great job! Keep learning to master this language."
+                  }
                 </p>
               </div>
             </div>

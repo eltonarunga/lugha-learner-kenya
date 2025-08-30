@@ -77,10 +77,12 @@ export type Database = {
       lessons: {
         Row: {
           created_at: string
+          cultural_context: string | null
           description: string | null
           id: string
           is_active: boolean
           language_code: string
+          lesson_type: string | null
           level: number
           order_index: number
           title: string
@@ -89,10 +91,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cultural_context?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
           language_code: string
+          lesson_type?: string | null
           level?: number
           order_index: number
           title: string
@@ -101,10 +105,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cultural_context?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
           language_code?: string
+          lesson_type?: string | null
           level?: number
           order_index?: number
           title?: string
@@ -174,36 +180,45 @@ export type Database = {
           audio_url: string | null
           correct_answer: number
           created_at: string
+          cultural_meaning: string | null
           explanation: string | null
           id: string
           image_url: string | null
+          language_origin: string | null
           lesson_id: string
           options: string[]
           order_index: number
+          proverb_text: string | null
           question_text: string
         }
         Insert: {
           audio_url?: string | null
           correct_answer: number
           created_at?: string
+          cultural_meaning?: string | null
           explanation?: string | null
           id?: string
           image_url?: string | null
+          language_origin?: string | null
           lesson_id: string
           options: string[]
           order_index: number
+          proverb_text?: string | null
           question_text: string
         }
         Update: {
           audio_url?: string | null
           correct_answer?: number
           created_at?: string
+          cultural_meaning?: string | null
           explanation?: string | null
           id?: string
           image_url?: string | null
+          language_origin?: string | null
           lesson_id?: string
           options?: string[]
           order_index?: number
+          proverb_text?: string | null
           question_text?: string
         }
         Relationships: [

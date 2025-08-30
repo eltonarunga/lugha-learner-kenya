@@ -9,6 +9,9 @@ export interface Question {
   audio_url?: string;
   options: string[];
   order_index: number;
+  proverb_text?: string;
+  cultural_meaning?: string;
+  language_origin?: string;
 }
 
 export const useQuestions = (lessonId: string | null) => {

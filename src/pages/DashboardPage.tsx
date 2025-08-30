@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Flame, Star, Play, Target, Calendar, BookOpen, Sparkles } from "lucide-react";
+import { Trophy, Flame, Star, Play, Target, Calendar, BookOpen, Sparkles, Library } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
@@ -213,7 +213,7 @@ const DashboardPage = () => {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3 pb-6">
+      <div className="grid grid-cols-3 gap-3 pb-6">
         <Button
           onClick={onViewProgress}
           variant="outline"
@@ -227,6 +227,14 @@ const DashboardPage = () => {
           className="h-12"
         >
           Leaderboard
+        </Button>
+        <Button
+          onClick={() => navigate("/cultural-library")}
+          variant="outline"
+          className="h-12 flex items-center gap-2"
+        >
+          <Library className="w-4 h-4" />
+          Library
         </Button>
       </div>
     </div>

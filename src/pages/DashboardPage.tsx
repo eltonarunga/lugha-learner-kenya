@@ -229,7 +229,7 @@ const DashboardPage = () => {
           Leaderboard
         </Button>
         <Button
-          onClick={() => navigate("/cultural-library")}
+          onClick={() => navigate("/library")}
           variant="outline"
           className="h-12 flex items-center gap-2"
         >

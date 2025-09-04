@@ -70,17 +70,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         .eq('user_id', userId)
         .single();
 
-      if (profile) {
+      if (profile && profile.name && profile.age && profile.selected_language) {
+        // User has a complete profile
         setUserData({
-          name: profile.name || 'User',
-          age: profile.age || '',
-          language: profile.selected_language || 'swahili',
+          name: profile.name,
+          age: profile.age,
+          language: profile.selected_language,
           email: profile.email || '',
+          isGuest: false
+        });
+      } else {
+        // User exists but profile is incomplete, they need onboarding
+        setUserData({
+          name: profile?.name || '',
+          age: profile?.age || '',
+          language: profile?.selected_language || '',
+          email: profile?.email || '',
           isGuest: false
         });
       }
     } catch (error) {
+      // Profile doesn't exist, user needs onboarding
       console.error('Error fetching user profile:', error);
+      setUserData({
+        name: '',
+        age: '',
+        language: '',
+        email: '',
+        isGuest: false
+      });
     }
   };
 

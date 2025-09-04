@@ -12,7 +12,7 @@ import LessonPage from "@/pages/LessonPage";
 import ProgressPage from "@/pages/ProgressPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import SettingsPage from "@/pages/SettingsPage";
-import CulturalLibraryPage from "@/pages/CulturalLibraryPage";
+
 import MainLayout from "@/components/MainLayout";
 import { UserProvider } from "@/contexts/UserContext";
 
@@ -30,7 +30,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/lesson" element={<LessonPage />} />
-            <Route path="/cultural-library" element={<CulturalLibraryPage />} />
+            
 
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />

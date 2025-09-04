@@ -8,7 +8,6 @@ export const Navigation = () => {
 
   const navItems = [
     { id: "dashboard", label: "Home", icon: Home, path: "/dashboard" },
-    { id: "library", label: "Wisdom", icon: Library, path: "/library" },
     { id: "progress", label: "Progress", icon: BarChart3, path: "/progress" },
     { id: "leaderboard", label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
     { id: "settings", label: "Settings", icon: Settings, path: "/settings" }

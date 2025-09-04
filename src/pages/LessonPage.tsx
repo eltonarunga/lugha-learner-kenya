@@ -127,6 +127,11 @@ const LessonPage = () => {
     }
 
     setShowFeedback(true);
+
+    // Auto-advance after showing feedback for 2 seconds
+    setTimeout(() => {
+      handleNext();
+    }, 2000);
   };
 
   const handleNext = async () => {
@@ -282,24 +287,22 @@ const LessonPage = () => {
         </Card>
       )}
 
-      {/* Continue Button */}
+      {/* Progress indicator */}
       {showFeedback && (
-        <Button
-          onClick={handleNext}
-          variant="hero"
-          size="lg"
-          className="w-full"
-          disabled={submitting}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            isLastQuestion ? "Complete Lesson! 🏆" : "Continue"
-          )}
-        </Button>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
+                Saving progress...
+              </>
+            ) : (
+              <>
+                {isLastQuestion ? "Completing lesson..." : "Moving to next question..."}
+              </>
+            )}
+          </p>
+        </div>
       )}
     </div>
   );

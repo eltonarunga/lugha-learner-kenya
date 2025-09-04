@@ -12,6 +12,7 @@ import LessonPage from "@/pages/LessonPage";
 import ProgressPage from "@/pages/ProgressPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import SettingsPage from "@/pages/SettingsPage";
+import LibraryPage from "@/pages/LibraryPage";
 
 import MainLayout from "@/components/MainLayout";
 import { UserProvider } from "@/contexts/UserContext";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/library" element={<LibraryPage />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

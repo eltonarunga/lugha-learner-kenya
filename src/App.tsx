@@ -13,6 +13,11 @@ import ProgressPage from "@/pages/ProgressPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import SettingsPage from "@/pages/SettingsPage";
 import LibraryPage from "@/pages/LibraryPage";
+import CommunityPage from "@/pages/CommunityPage";
+import ChallengesPage from "@/pages/ChallengesPage";
+import ReviewPage from "@/pages/ReviewPage";
+import GrammarPage from "@/pages/GrammarPage";
+import ConversationPage from "@/pages/ConversationPage";
 
 import MainLayout from "@/components/MainLayout";
 import { UserProvider } from "@/contexts/UserContext";
@@ -39,6 +44,11 @@ const App = () => (
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/library" element={<LibraryPage />} />
+              <Route path="/community" element={<CommunityPage />} />
+              <Route path="/challenges" element={<ChallengesPage />} />
+              <Route path="/review" element={<ReviewPage />} />
+              <Route path="/grammar" element={<GrammarPage />} />
+              <Route path="/conversation" element={<ConversationPage />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

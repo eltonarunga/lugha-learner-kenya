@@ -18,10 +18,10 @@ const DashboardPage = () => {
   const { achievements, loading: achievementsLoading } = useUserAchievements();
 
   const languageLabels: { [key: string]: string } = {
-    swahili: "Kenya",
+    swahili: "Kiswahili",
     kikuyu: "Gĩkũyũ", 
     luo: "Dholuo",
-    nandi: "Kalenjin"
+    kalenjin: "Kalenjin"
   };
 
   const getLessonTypeIcon = (type?: string) => {

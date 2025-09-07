@@ -43,7 +43,7 @@ const SettingsPage = () => {
   };
 
   const languages = [
-    { value: "swahili", label: "Kiswahili 🇹🇿" },
+    { value: "swahili", label: "Kenya 🇹🇿" },
     { value: "kikuyu", label: "Gĩkũyũ 🇰🇪" },
     { value: "luo", label: "Dholuo 🇰🇪" }
   ];

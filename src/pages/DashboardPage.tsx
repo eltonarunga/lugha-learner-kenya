@@ -18,7 +18,7 @@ const DashboardPage = () => {
   const { achievements, loading: achievementsLoading } = useUserAchievements();
 
   const languageLabels: { [key: string]: string } = {
-    swahili: "Kiswahili",
+    swahili: "Kenya",
     kikuyu: "Gĩkũyũ", 
     luo: "Dholuo",
     nandi: "Kalenjin"

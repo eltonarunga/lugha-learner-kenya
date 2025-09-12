@@ -9,6 +9,12 @@ import { Navigate } from "react-router-dom";
 import { useLessons } from "@/hooks/useLessons";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useUserAchievements } from "@/hooks/useUserAchievements";
+import { DailyGoal } from "@/components/DailyGoal";
+import { QuickActions } from "@/components/QuickActions";
+import { RecentAchievements } from "@/components/RecentAchievements";
+import { StreakCounter } from "@/components/StreakCounter";
+import { XPAnimator } from "@/components/XPAnimator";
+import { LevelProgress } from "@/components/LevelProgress";
 
 const DashboardPage = () => {
   const { userData } = useUser();
@@ -39,6 +45,8 @@ const DashboardPage = () => {
   };
 
   const todayGoal = 50;
+  const xpForNextLevel = Math.max(0, (stats.level * 100) - stats.totalXP);
+  const totalXPForNextLevel = stats.level * 100;
 
   if (!userData) {
     return <Navigate to="/auth" />;
@@ -67,68 +75,69 @@ const DashboardPage = () => {
   const onViewLeaderboard = () => navigate("/leaderboard");
 
   return (
-    <div className="min-h-screen bg-background p-4 space-y-6">
+    <div className="min-h-screen bg-background p-4 space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">
+      <div className="text-center space-y-3">
+        <h1 className="text-3xl font-bold animate-slide-in">
           Jambo, {userData.name}! 👋
         </h1>
         <p className="text-muted-foreground">
           Ready to continue your {languageLabels[userData.language]} journey?
         </p>
+        
+        {/* Level Progress */}
+        <LevelProgress
+          currentLevel={stats.level}
+          currentXP={stats.totalXP}
+          xpForNextLevel={xpForNextLevel}
+          totalXPForNextLevel={totalXPForNextLevel}
+          className="max-w-md mx-auto"
+        />
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="text-center shadow-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center space-y-1">
-              <Flame className="w-6 h-6 text-warning" />
-              <p className="text-2xl font-bold text-warning">{stats.streak}</p>
-              <p className="text-xs text-muted-foreground">Day Streak</p>
-            </div>
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="hover:shadow-card transition-all duration-300 hover:scale-105">
+          <CardContent className="p-6 text-center">
+            <StreakCounter 
+              currentStreak={stats.streak}
+              longestStreak={Math.max(stats.streak, stats.streak * 1.2)}
+              size="md"
+            />
           </CardContent>
         </Card>
 
-        <Card className="text-center shadow-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center space-y-1">
-              <Star className="w-6 h-6 text-primary" />
-              <p className="text-2xl font-bold text-primary">{stats.totalXP}</p>
-              <p className="text-xs text-muted-foreground">Total XP</p>
-            </div>
+        <Card className="hover:shadow-primary transition-all duration-300 hover:scale-105">
+          <CardContent className="p-6 text-center">
+            <XPAnimator 
+              startXP={Math.max(0, stats.totalXP - 50)}
+              endXP={stats.totalXP}
+              className="text-xl"
+            />
+            <p className="text-sm text-muted-foreground mt-2">
+              Keep growing! 🌟
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="text-center shadow-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center space-y-1">
-              <Trophy className="w-6 h-6 text-accent" />
-              <p className="text-2xl font-bold text-accent">{stats.level}</p>
-              <p className="text-xs text-muted-foreground">Level</p>
+        <Card className="hover:shadow-card transition-all duration-300 hover:scale-105">
+          <CardContent className="p-6 text-center">
+            <div className="flex flex-col items-center space-y-2">
+              <BookOpen className="w-8 h-8 text-success animate-float" />
+              <p className="text-2xl font-bold text-success">{stats.lessonsCompleted}</p>
+              <p className="text-sm text-muted-foreground">Lessons Completed</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Daily Goal Progress */}
-      <Card className="shadow-card">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Target className="w-5 h-5 text-success" />
-              Daily Goal
-            </CardTitle>
-            <Badge variant="secondary">{stats.todayProgress}/{todayGoal} XP</Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Progress value={(stats.todayProgress / todayGoal) * 100} className="h-3" />
-          <p className="text-sm text-muted-foreground mt-2">
-            {todayGoal - stats.todayProgress} XP to reach your daily goal!
-          </p>
-        </CardContent>
-      </Card>
+      {/* Enhanced Daily Goal */}
+      <DailyGoal 
+        currentXP={stats.todayProgress}
+        dailyGoal={todayGoal}
+        streak={stats.streak}
+        className="animate-slide-up"
+      />
 
       {/* Today's Lessons */}
       <Card className="shadow-card">
@@ -182,61 +191,19 @@ const DashboardPage = () => {
         </CardContent>
       </Card>
 
-      {/* Achievements */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Achievements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4">
-            {achievements.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4 w-full">
-                Complete lessons to unlock achievements!
-              </p>
-            ) : (
-              achievements.slice(0, 3).map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`flex flex-col items-center space-y-2 p-3 rounded-lg transition-smooth ${
-                    achievement.earned
-                      ? "bg-gradient-success text-success-foreground shadow-celebration"
-                      : "bg-muted/50 opacity-50"
-                  }`}
-                >
-                  <span className="text-2xl">{achievement.icon}</span>
-                  <p className="text-xs text-center font-medium">{achievement.name}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-3 pb-6">
-        <Button
-          onClick={onViewProgress}
-          variant="outline"
-          className="h-12"
-        >
-          View Progress
-        </Button>
-        <Button
-          onClick={onViewLeaderboard}
-          variant="outline"
-          className="h-12"
-        >
-          Leaderboard
-        </Button>
-        <Button
-          onClick={() => navigate("/library")}
-          variant="outline"
-          className="h-12 flex items-center gap-2"
-        >
-          <Library className="w-4 h-4" />
-          Library
-        </Button>
+      {/* Enhanced Layout: Achievements and Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Enhanced Achievements */}
+        <RecentAchievements 
+          achievements={achievements}
+          maxDisplay={4}
+          className="animate-slide-up"
+        />
+        
+        {/* Enhanced Quick Actions */}
+        <QuickActions />
       </div>
+
     </div>
   );
 };
